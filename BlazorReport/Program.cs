@@ -15,4 +15,7 @@ builder.Services.AddBootstrapBlazor();
 // 社員データサービスの登録
 builder.Services.AddScoped<EmployeeService>();
 
+// Excelエクスポートサービスの登録
+builder.Services.AddScoped<ExcelExportService>();
+
 await builder.Build().RunAsync();
