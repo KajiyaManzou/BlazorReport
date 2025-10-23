@@ -45,3 +45,40 @@ BlazorReport/Services/ExcelExportService.csを作成しました。
 
 BlazorReport/Program.cs:19にExcelExportServiceを登録しました。
 
+## 4.2 実行内容
+
+1. pdfExport.jsの作成
+
+BlazorReport/wwwroot/js/pdfExport.jsを作成しました。
+
+実装内容:
+
+テーブル定義（ヘッダーとデータ）
+
+- ヘッダー定義 (26-32行目): 社員番号、氏名、所属、役職、入社年月日
+- データ整形 (35-41行目): Blazorから渡されたデータをjsPDF-AutoTable用に変換
+
+スタイリング設定
+
+- ドキュメント設定 (13-16行目): A4横向き
+- タイトル (22-23行目): "社員情報一覧" (16pt)
+- テーブルスタイル (46-67行目):
+    - セルパディング、フォントサイズ
+    - ヘッダー: 青色背景、白文字、太字、中央揃え
+    - 交互の行: 薄いグレー背景
+    
+日本語フォント対応の設定
+
+- デフォルトのhelveticaフォントを使用 (19行目)
+- 日本語は文字として表示されます（基本的な表示対応）
+
+Blazorコンポーネントから呼び出すメソッドの実装
+
+- window.pdfExportFunctions.exportToPdf() (9-76行目)
+- パラメータ: 社員データ配列、ファイル名
+- jsPDFのsave()メソッドでダウンロード実行 (71行目)
+- エラーハンドリング実装
+
+2. index.htmlへの参照追加
+
+BlazorReport/wwwroot/index.html:34にpdfExport.jsのscript参照を追加しました。
