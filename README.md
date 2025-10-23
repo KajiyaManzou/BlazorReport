@@ -13,7 +13,7 @@ Blazor WebAssemblyで構築された社員情報管理・レポート出力ア�
 
 ## デモ
 
-🔗 **[ライブデモはこちら](https://your-username.github.io/BlazorReport/)**
+🔗 **[ライブデモはこちら](https://kajiyamanzou.github.io/BlazorReport/)**
 
 > リポジトリをフォークして独自のデータで試すこともできます！
 
