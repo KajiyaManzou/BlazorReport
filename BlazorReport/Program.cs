@@ -9,6 +9,9 @@ builder.RootComponents.Add<HeadOutlet>("head::after");
 
 builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
 
+// BootstrapBlazorサービスの追加
+builder.Services.AddBootstrapBlazor();
+
 // 社員データサービスの登録
 builder.Services.AddScoped<EmployeeService>();
 
