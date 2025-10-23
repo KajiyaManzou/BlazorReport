@@ -1,7 +1,42 @@
-﻿@page "/"
+@page "/"
+@inject EmployeeService EmployeeService
 
-<PageTitle>Home</PageTitle>
+<PageTitle>社員情報管理</PageTitle>
 
-<h1>Hello, world!</h1>
+<div class="container-fluid mt-4">
+    <h2 class="mb-4">社員情報管理</h2>
 
-Welcome to your new app.
+    @if (employees == null)
+    {
+        <p><em>データを読み込んでいます...</em></p>
+    }
+    else if (employees.Count == 0)
+    {
+        <p><em>データがありません。</em></p>
+    }
+    else
+    {
+        <Table TItem="Employee"
+               Items="@employees"
+               IsBordered="true"
+               IsStriped="true"
+               AutoGenerateColumns="false">
+            <TableColumns>
+                <TableColumn @bind-Field="@context.EmployeeNumber" Text="社員番号" Sortable="true" />
+                <TableColumn @bind-Field="@context.Name" Text="氏名" Sortable="true" />
+                <TableColumn @bind-Field="@context.Department" Text="所属" Sortable="true" />
+                <TableColumn @bind-Field="@context.Post" Text="役職" Sortable="true" />
+                <TableColumn @bind-Field="@context.DateOfJoining" Text="入社年月日" Sortable="true" />
+            </TableColumns>
+        </Table>
+    }
+</div>
+
+@code {
+    private List<Employee>? employees;
+
+    protected override async Task OnInitializedAsync()
+    {
+        employees = await EmployeeService.GetEmployeesAsync();
+    }
+}
