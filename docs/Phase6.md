@@ -139,4 +139,37 @@ All Phase 6.4 tasks have been successfully completed. The application is now rea
 - BlazorReport/wwwroot/index.html
 - BlazorReport/GITHUB_PAGES_SETUP.md
 
-Important note: The <base href="/" /> in index.html:8 will need to be updated to <base href="/repository-name/" /> once you create your GitHub repository. The setup guide includes detailed instructions for this step. Phase 6.4 is complete. 
+Important note: The <base href="/" /> in index.html:8 will need to be updated to <base href="/repository-name/" /> once you create your GitHub repository. The setup guide includes detailed instructions for this step. Phase 6.4 is complete.
+
+## 6.5 完了内容
+
+✅ .github/workflows フォルダの作成
+
+- github/workflows/ ディレクトリを作成
+
+✅ deploy.yml ワークフローファイルの作成
+
+- github/workflows/deploy.yml を作成
+- 主な機能:
+    - mainブランチへのプッシュ時に自動デプロイ
+    - 手動実行も可能（workflow_dispatch）
+    - .NET SDK 8.0のセットアップ
+    - 依存関係のリストア
+    - Blazor WebAssemblyのビルドと公開
+    - base hrefの自動変更（リポジトリ名に合わせて自動的に変更）
+    - .nojekyllファイルの自動作成
+    - GitHub Pagesへのデプロイ
+
+✅ GitHub Pages設定の確認
+
+- GITHUB_PAGES_SETUP.md を更新
+- GitHub Actions使用時の設定手順を追加
+- ワークフローの詳細説明を追加
+- 重要な注意点を記載（base hrefの自動変更について）
+
+ワークフローの特徴
+
+    1. 自動base href変更: index.htmlのbase hrefは <base href="/" /> のままでOK。デプロイ時に自動的にリポジトリ名に合わせて変更されます
+    1. 2段階デプロイ: buildジョブでビルド → deployジョブでGitHub Pagesにデプロイ
+    1. 権限設定: GitHub Pagesへのデプロイに必要な権限を適切に設定
+    1. 同時実行制御: 複数のデプロイが同時に実行されないよう制御

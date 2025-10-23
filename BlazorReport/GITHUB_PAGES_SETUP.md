@@ -143,21 +143,57 @@ git push -u origin main
 
 ---
 
-## 手順5: GitHub Pagesの有効化
+## 手順5: GitHub Pagesの有効化（GitHub Actions使用）
+
+### GitHub Actions デプロイの設定
 
 1. GitHubのリポジトリページを開く
 2. 「Settings」タブをクリック
 3. 左メニューから「Pages」を選択
 4. 「Source」で以下を設定:
-   - **Source**: GitHub Actions を選択
-   - または、手動デプロイの場合は「Deploy from a branch」を選択
+   - **Source**: **GitHub Actions** を選択
 5. 保存
+
+### ワークフローファイルの確認
+
+`.github/workflows/deploy.yml` ファイルが既に作成されています。このファイルは以下の処理を自動的に実行します:
+
+- mainブランチへのプッシュ時に自動デプロイ
+- .NET SDK 8.0のセットアップ
+- 依存関係のリストア
+- Blazor WebAssemblyのビルドと公開
+- base hrefの自動変更（リポジトリ名に合わせる）
+- .nojekyllファイルの作成
+- GitHub Pagesへのデプロイ
+
+### 初回デプロイ
+
+mainブランチにコードをプッシュすると、GitHub Actionsワークフローが自動的に開始されます:
+
+```bash
+# mainブランチにプッシュ
+git push -u origin main
+```
+
+プッシュ後、以下を確認:
+
+1. リポジトリの「Actions」タブを開く
+2. 「Deploy to GitHub Pages」ワークフローが実行中であることを確認
+3. ワークフローが完了するまで待機（通常2-5分）
+4. ビルドエラーがないか確認
 
 ### オプション: 手動デプロイの場合
 
-publishフォルダの内容をgh-pagesブランチにデプロイ:
+GitHub Actionsを使用せず、手動でデプロイする場合:
+
+1. GitHub Pages設定で「Source」を「Deploy from a branch」に変更
+2. publishフォルダの内容をgh-pagesブランチにデプロイ:
 
 ```bash
+# ベースパスの変更後、ビルド
+cd BlazorReport
+dotnet publish -c Release -o ./publish
+
 # gh-pagesブランチを作成
 git checkout --orphan gh-pages
 
@@ -217,9 +253,37 @@ git checkout main
 
 ---
 
-## 次のステップ
+## GitHub Actionsワークフローの詳細
 
-GitHub Actionsを使用した自動デプロイについては、フェーズ6.5を参照してください。
+### ワークフローファイル: `.github/workflows/deploy.yml`
+
+このワークフローは以下の2つのジョブで構成されています:
+
+#### 1. buildジョブ
+- リポジトリのコードをチェックアウト
+- .NET SDK 8.0をセットアップ
+- 依存関係をリストア
+- Blazor WebAssemblyアプリをビルド・公開
+- index.htmlのbase hrefをリポジトリ名に合わせて自動変更
+- .nojekyllファイルを作成（GitHub Pagesで_から始まるファイルを無視しないため）
+- ビルド成果物をアップロード
+
+#### 2. deployジョブ
+- buildジョブの完了後に実行
+- GitHub Pagesに成果物をデプロイ
+- デプロイURLを出力
+
+### トリガー条件
+
+- mainブランチへのプッシュ時に自動実行
+- GitHub UIから手動実行も可能（workflow_dispatch）
+
+### 重要な注意点
+
+**base hrefの自動変更:**
+ワークフローは自動的にリポジトリ名を検出し、base hrefを変更します。そのため、`index.html`のbase hrefは `<base href="/" />` のままで問題ありません。デプロイ時に自動的に `<base href="/リポジトリ名/" />` に変更されます。
+
+ただし、ローカルで公開フォルダをテストする場合は、手動でbase hrefを変更してください。
 
 ---
 

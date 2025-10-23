@@ -1,0 +1,74 @@
+name: Deploy to GitHub Pages
+
+# mainブランチへのプッシュ時、またはワークフローを手動実行した時にデプロイを実行
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+# GitHub Pagesへのデプロイに必要な権限設定
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# 同時実行を防ぐ（1つのデプロイが完了してから次のデプロイを実行）
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    # リポジトリのコードをチェックアウト
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    # .NET SDK 8.0 のセットアップ
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+
+    # 依存関係のリストア
+    - name: Restore dependencies
+      run: dotnet restore BlazorReport/BlazorReport.csproj
+
+    # Blazor WebAssemblyアプリケーションのビルドと公開
+    # base-pathはGitHubリポジトリ名に合わせて変更が必要
+    - name: Publish
+      run: dotnet publish BlazorReport/BlazorReport.csproj -c Release -o release --nologo
+
+    # base hrefをGitHub Pages用に変更（リポジトリ名に合わせる）
+    # 例: リポジトリ名が "blazor-employee-report" の場合、 /blazor-employee-report/ に設定
+    - name: Change base-href in index.html
+      run: |
+        sed -i 's|<base href="/" />|<base href="/${{ github.event.repository.name }}/" />|g' release/wwwroot/index.html
+
+    # .nojekyll ファイルを作成（GitHub PagesでBlazorアプリが正常に動作するために必要）
+    - name: Add .nojekyll file
+      run: touch release/wwwroot/.nojekyll
+
+    # GitHub Pages用の404.htmlをコピー（既に作成済み）
+    # SPAルーティングサポートのため
+
+    # GitHub Pages用にビルド成果物をアップロード
+    - name: Upload artifact
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: release/wwwroot
+
+  # GitHub Pagesへのデプロイジョブ
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+    - name: Deploy to GitHub Pages
+      id: deployment
+      uses: actions/deploy-pages@v4
