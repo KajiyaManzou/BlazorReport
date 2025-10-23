@@ -6,6 +6,15 @@
 <div class="container-fluid mt-4">
     <h2 class="mb-4">社員情報管理</h2>
 
+    <div class="mb-3">
+        <Button Color="Color.Success" Icon="fa-solid fa-file-excel" OnClick="ExportToExcel" class="me-2">
+            Excelエクスポート
+        </Button>
+        <Button Color="Color.Danger" Icon="fa-solid fa-file-pdf" OnClick="ExportToPdf">
+            PDFエクスポート
+        </Button>
+    </div>
+
     @if (employees == null)
     {
         <p><em>データを読み込んでいます...</em></p>
@@ -38,5 +47,17 @@
     protected override async Task OnInitializedAsync()
     {
         employees = await EmployeeService.GetEmployeesAsync();
+    }
+
+    private async Task ExportToExcel()
+    {
+        // Excel エクスポート処理（後で実装）
+        await Task.CompletedTask;
+    }
+
+    private async Task ExportToPdf()
+    {
+        // PDF エクスポート処理（後で実装）
+        await Task.CompletedTask;
     }
 }
