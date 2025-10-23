@@ -3,6 +3,9 @@ using BlazorReport.Models;
 
 namespace BlazorReport.Services
 {
+    /// <summary>
+    /// Excelエクスポート機能を提供するサービスクラス
+    /// </summary>
     public class ExcelExportService
     {
         /// <summary>

@@ -44,13 +44,20 @@
 </div>
 
 @code {
+    // 社員データリスト
     private List<Employee>? employees;
 
+    /// <summary>
+    /// 初期化時に社員データを読み込む
+    /// </summary>
     protected override async Task OnInitializedAsync()
     {
         employees = await EmployeeService.GetEmployeesAsync();
     }
 
+    /// <summary>
+    /// Excelファイルにエクスポート
+    /// </summary>
     private async Task ExportToExcel()
     {
         if (employees == null || employees.Count == 0)
@@ -78,6 +85,9 @@
         }
     }
 
+    /// <summary>
+    /// PDFファイルにエクスポート
+    /// </summary>
     private async Task ExportToPdf()
     {
         if (employees == null || employees.Count == 0)

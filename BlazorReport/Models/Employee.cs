@@ -2,6 +2,9 @@ using System.Text.Json.Serialization;
 
 namespace BlazorReport.Models
 {
+    /// <summary>
+    /// 社員情報を表すモデルクラス
+    /// </summary>
     public class Employee
     {
         [JsonPropertyName("社員番号")]

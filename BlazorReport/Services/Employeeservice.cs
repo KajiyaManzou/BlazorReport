@@ -1,14 +1,20 @@
 using System.Net.Http.Json;
-using System.Text.Json;
 using BlazorReport.Models;
 
 namespace BlazorReport.Services
 {
+    /// <summary>
+    /// 社員データを管理するサービスクラス
+    /// </summary>
     public class EmployeeService
     {
         private readonly HttpClient _httpClient;
         private List<Employee>? _employees;
 
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
+        /// <param name="httpClient">HTTPクライアント</param>
         public EmployeeService(HttpClient httpClient)
         {
             _httpClient = httpClient;

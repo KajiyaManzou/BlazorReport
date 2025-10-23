@@ -1,14 +1,13 @@
 // HTML2Canvas を使用した日本語対応PDFエクスポート
 
+/**
+ * HTML2Canvasを使用して社員データをPDFにエクスポートします（日本語対応）
+ * @param {Array} employees - 社員データの配列
+ * @param {string} fileName - ダウンロードするファイル名
+ * @returns {Promise<boolean>} 成功した場合true、失敗した場合false
+ */
 window.pdfExportFunctions.exportToPdfCanvas = async function (employees, fileName) {
     try {
-        console.log('PDF export (Canvas method) started');
-        console.log('Employees received:', employees);
-        if (employees && employees.length > 0) {
-            console.log('First employee:', employees[0]);
-            console.log('First employee keys:', Object.keys(employees[0]));
-        }
-        console.log('Creating temporary HTML table...');
 
         // 一時的なHTML要素を作成
         const container = document.createElement('div');
@@ -62,8 +61,6 @@ window.pdfExportFunctions.exportToPdfCanvas = async function (employees, fileNam
                 emp['入社年月日'] || emp.dateOfJoining || emp.DateOfJoining || ''
             ];
 
-            console.log('Employee data:', emp, '-> Values:', values);
-            
             values.forEach(value => {
                 const td = document.createElement('td');
                 td.textContent = value;
@@ -77,11 +74,10 @@ window.pdfExportFunctions.exportToPdfCanvas = async function (employees, fileNam
         table.appendChild(tbody);
         container.appendChild(table);
 
-        // DOM に追加
+        // DOMに追加（画面外に配置）
         document.body.appendChild(container);
 
-        // html2canvas で画像化
-        console.log('Converting HTML to canvas...');
+        // html2canvasでHTMLを画像化
         const canvas = await html2canvas(container, {
             scale: 2,
             logging: false,
@@ -89,11 +85,10 @@ window.pdfExportFunctions.exportToPdfCanvas = async function (employees, fileNam
             allowTaint: true
         });
 
-        // DOM から削除
+        // DOMから削除
         document.body.removeChild(container);
 
-        // Canvas から PDF へ
-        console.log('Creating PDF from canvas...');
+        // CanvasからPDFを生成
         const { jsPDF } = window.jspdf;
         const imgData = canvas.toDataURL('image/png');
         
@@ -109,11 +104,9 @@ window.pdfExportFunctions.exportToPdfCanvas = async function (employees, fileNam
         
         pdf.addImage(imgData, 'PNG', 10, 10, imgWidth, Math.min(imgHeight, pageHeight));
 
-        // PDFを保存
-        console.log('Saving PDF...');
+        // PDFをダウンロード
         pdf.save(fileName || '社員情報.pdf');
 
-        console.log('PDF export (Canvas method) completed successfully');
         return true;
     } catch (error) {
         console.error('PDF export (Canvas method) error:', error);
