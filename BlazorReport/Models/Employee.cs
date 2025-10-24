@@ -7,19 +7,19 @@ namespace BlazorReport.Models
     /// </summary>
     public class Employee
     {
-        [JsonPropertyName("社員番号")]
+        [JsonPropertyName("EmployeeNumber")]
         public string EmployeeNumber { get; set; } = string.Empty;
 
-        [JsonPropertyName("氏名")]
+        [JsonPropertyName("Name")]
         public string Name { get; set; } = string.Empty;
 
-        [JsonPropertyName("所属")]
+        [JsonPropertyName("Department")]
         public string Department { get; set; } = string.Empty;
 
-        [JsonPropertyName("役職")]
+        [JsonPropertyName("Post")]
         public string Post { get; set; } = string.Empty;
 
-        [JsonPropertyName("入社年月日")]
+        [JsonPropertyName("DateOfJoining")]
         public string DateOfJoining { get; set; } = string.Empty;
     }
 }

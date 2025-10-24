@@ -3,47 +3,53 @@
 @inject ExcelExportService ExcelExportService
 @inject IJSRuntime JSRuntime
 
-<PageTitle>社員情報管理</PageTitle>
+<PageTitle>@PageTitle</PageTitle>
 
 <div class="container-fluid mt-4">
-    <h2 class="mb-4">社員情報管理</h2>
+    <h2 class="mb-4">@PageTitle</h2>
 
     <div class="mb-3">
         <Button Color="Color.Success" Icon="fa-solid fa-file-excel" OnClick="ExportToExcel" class="me-2">
-            Excelエクスポート
+            @LabelExportToExcel
         </Button>
         <Button Color="Color.Danger" Icon="fa-solid fa-file-pdf" OnClick="ExportToPdf">
-            PDFエクスポート
+            @LabelExportToPdf
         </Button>
     </div>
 
     @if (employees == null)
     {
-        <p><em>データを読み込んでいます...</em></p>
+        <p><em>@MessageDataReading</em></p>
     }
     else if (employees.Count == 0)
     {
-        <p><em>データがありません。</em></p>
+        <p><em>@MessageDataNotFound</em></p>
     }
     else
     {
-        <Table TItem="Employee"
-               Items="@employees"
-               IsBordered="true"
-               IsStriped="true"
-               AutoGenerateColumns="false">
+        <Table TItem="Employee" Items="@employees" IsBordered="true" IsStriped="true" AutoGenerateColumns="false">
             <TableColumns>
-                <TableColumn @bind-Field="@context.EmployeeNumber" Text="社員番号" Sortable="true" />
-                <TableColumn @bind-Field="@context.Name" Text="氏名" Sortable="true" />
-                <TableColumn @bind-Field="@context.Department" Text="所属" Sortable="true" />
-                <TableColumn @bind-Field="@context.Post" Text="役職" Sortable="true" />
-                <TableColumn @bind-Field="@context.DateOfJoining" Text="入社年月日" Sortable="true" />
+                <TableColumn @bind-Field="@context.EmployeeNumber" Text=@HeaderEmployeeNumber Sortable="true" />
+                <TableColumn @bind-Field="@context.Name" Text=@HeaderName Sortable="true" />
+                <TableColumn @bind-Field="@context.Department" Text=@HeaderDepartment Sortable="true" />
+                <TableColumn @bind-Field="@context.Post" Text=@HeaderPost Sortable="true" />
+                <TableColumn @bind-Field="@context.DateOfJoining" Text=@HeaderDateOfJoining Sortable="true" />
             </TableColumns>
         </Table>
     }
 </div>
 
 @code {
+    private readonly string PageTitle = "社員情報管理";
+    private readonly string HeaderEmployeeNumber = "社員番号";
+    private readonly string HeaderName = "氏名";
+    private readonly string HeaderDepartment = "所属";
+    private readonly string HeaderPost = "役職";
+    private readonly string HeaderDateOfJoining = "入社年月日";
+    private readonly string LabelExportToExcel = "Excelエクスポート";
+    private readonly string LabelExportToPdf = "PDFエクスポート";
+    private readonly string MessageDataReading = "データを読み込んでいます...";
+    private readonly string MessageDataNotFound = "データがありません。";
     // 社員データリスト
     private List<Employee>? employees;
 
@@ -73,10 +79,10 @@
             // JavaScriptを呼び出してダウンロード
             var fileName = $"社員情報_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx";
             await JSRuntime.InvokeVoidAsync(
-                "fileDownloadFunctions.downloadFile",
-                fileName,
-                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                excelBytes
+            "fileDownloadFunctions.downloadFile",
+            fileName,
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            excelBytes
             );
         }
         catch (Exception ex)
@@ -114,9 +120,9 @@
             // Canvas版を使用（日本語対応）
             var fileName = $"社員情報_{DateTime.Now:yyyyMMdd_HHmmss}.pdf";
             await JSRuntime.InvokeVoidAsync(
-                "pdfExportFunctions.exportToPdfCanvas",
-                employeeData,
-                fileName
+            "pdfExportFunctions.exportToPdfCanvas",
+            employeeData,
+            fileName
             );
         }
         catch (Exception ex)
