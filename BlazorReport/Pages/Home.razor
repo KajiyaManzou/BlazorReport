@@ -2,6 +2,10 @@
 @inject EmployeeService EmployeeService
 @inject ExcelExportService ExcelExportService
 @inject IJSRuntime JSRuntime
+@using System.Reactive
+@using System.Reactive.Linq
+@using System.Reactive.Subjects
+@implements IDisposable
 
 <PageTitle>@PageTitle</PageTitle>
 
@@ -9,10 +13,13 @@
     <h2 class="mb-4">@PageTitle</h2>
 
     <div class="mb-3">
-        <Button Color="Color.Success" Icon="fa-solid fa-file-excel" OnClick="ExportToExcel" class="me-2">
+        <Button Color="Color.Success" Icon="fa-solid fa-file-excel" @onclick="HandleExportToExcel" class="me-2"
+            IsDisabled="@_isProcessing">
+
             @LabelExportToExcel
         </Button>
-        <Button Color="Color.Danger" Icon="fa-solid fa-file-pdf" OnClick="ExportToPdf">
+        <Button Color="Color.Danger" Icon="fa-solid fa-file-pdf" @onclick="HandleExportToPdf" class="me-2"
+            IsDisabled="@_isProcessing">
             @LabelExportToPdf
         </Button>
     </div>
@@ -61,6 +68,46 @@
         employees = await EmployeeService.GetEmployeesAsync();
     }
 
+    // アクションの種類を定義
+    private enum ExportAction { Excel, Pdf }
+    private readonly Subject<ExportAction> _clickSubject = new();
+    private IDisposable? _subscription;
+    private bool _isProcessing = false;
+    private int _clickCount = 0;
+    private int _executionCount = 0;
+
+    protected override void OnInitialized()
+    {
+        _subscription = _clickSubject
+        .Where(_ => !_isProcessing)
+        .Throttle(TimeSpan.FromMilliseconds(500))
+        .Subscribe(async action =>
+        {
+            _isProcessing = true;
+            await InvokeAsync(StateHasChanged);
+            if (action == ExportAction.Excel)
+            {
+                await ExportToExcel();
+            }
+            else
+            {
+                await ExportToPdf();
+            }
+
+            _isProcessing = false;
+            await InvokeAsync(StateHasChanged);
+        });
+    }
+    private void HandleExportToExcel()
+    {
+        _clickCount++;
+        _clickSubject.OnNext(ExportAction.Excel);
+    }
+    private void HandleExportToPdf()
+    {
+        _clickCount++;
+        _clickSubject.OnNext(ExportAction.Pdf);
+    }
     /// <summary>
     /// Excelファイルにエクスポート
     /// </summary>
@@ -70,6 +117,10 @@
         {
             return;
         }
+
+        _isProcessing = true;
+        _executionCount++;
+        await InvokeAsync(StateHasChanged);
 
         try
         {
@@ -89,6 +140,11 @@
         {
             System.Console.WriteLine($"Excel export error: {ex.Message}");
         }
+        finally
+        {
+            _isProcessing = false;
+            await InvokeAsync(StateHasChanged);
+        }
     }
 
     /// <summary>
@@ -100,6 +156,9 @@
         {
             return;
         }
+
+        _isProcessing = true;
+        await InvokeAsync(StateHasChanged);
 
         try
         {
@@ -129,5 +188,15 @@
         {
             System.Console.WriteLine($"PDF export error: {ex.Message}");
         }
+        finally
+        {
+            _isProcessing = false;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+    public void Dispose()
+    {
+        _subscription?.Dispose();
+        _clickSubject?.Dispose();
     }
 }

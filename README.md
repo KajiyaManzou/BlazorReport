@@ -8,6 +8,7 @@ Blazor WebAssemblyで構築された社員情報管理・レポート出力ア�
 - 🔄 **ソート機能** - 各列をクリックして昇順・降順でソート可能
 - 📑 **Excelエクスポート** - 社員情報をExcel形式でダウンロード
 - 📄 **PDFエクスポート** - 社員情報をPDF形式でダウンロード（日本語対応）
+- ⚡ **リアクティブプログラミング** - System.Reactiveを使用した連続クリック防止機能
 - 🚀 **高速動作** - Blazor WebAssemblyによるクライアントサイド実行
 - 📱 **レスポンシブデザイン** - モバイル・タブレット・デスクトップに対応
 
@@ -32,6 +33,7 @@ Blazor WebAssemblyで構築された社員情報管理・レポート出力ア�
 - **UIコンポーネント**: BootstrapBlazor
 - **Excelエクスポート**: ClosedXML
 - **PDFエクスポート**: jsPDF + html2canvas
+- **リアクティブプログラミング**: System.Reactive (Rx.NET)
 - **データ形式**: JSON
 - **ホスティング**: GitHub Pages
 
@@ -142,6 +144,23 @@ dotnet publish -c Release -o ./publish
 この問題は既に解決済みです。html2canvasを使用してHTML要素を画像に変換してからPDFに埋め込むことで、日本語フォントに対応しています。
 
 詳細は [docs/Phase4.md](docs/Phase4.md) を参照してください。
+
+### Chromeで連続ダウンロードがブロックされる
+
+**現象**: Safariでは問題なく動作するが、Chromeで2回目以降のダウンロードがブロックされる
+
+**原因**: リアクティブプログラミング（Throttle）による遅延実行がChromeのセキュリティポリシーに抵触する
+
+**解決策**:
+1. ユーザーのクリック操作から直接ダウンロード処理を実行する実装に変更
+2. 連続クリック防止は `_isProcessing` フラグで管理
+3. Throttleの遅延時間を最小限（500ms以下）に設定
+
+**ブラウザごとの動作**:
+- **Safari**: Throttleを使用しても問題なく動作
+- **Chrome**: ユーザー操作から時間が経過したダウンロードを自動ダウンロードと判断してブロック
+
+詳細な実装については [Home.razor](BlazorReport/Pages/Home.razor) の `HandleExportToExcel()` および `HandleExportToPdf()` メソッドを参照してください。
 
 ### GitHub Pagesでアプリが動作しない
 
