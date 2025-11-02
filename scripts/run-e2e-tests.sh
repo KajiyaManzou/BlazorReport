@@ -1,6 +1,9 @@
 #!/bin/bash
 # E2Eテストを自動実行（アプリ起動→テスト→停止）
 
+# .NET toolsをPATHに追加
+export PATH="$PATH:/home/devuser/.dotnet/tools"
+
 # BROWSER環境変数をクリア（Playwright用）
 unset BROWSER
 
@@ -20,8 +23,8 @@ APP_PID=$!
 cleanup() {
     echo "Stopping Blazor app..."
     kill $APP_PID 2>/dev/null || true
-    # Pythonサーバーも確実に停止
-    pkill -f "python3 -m http.server 5000" 2>/dev/null || true
+    # dotnet-serveも確実に停止
+    pkill -f "dotnet-serve" 2>/dev/null || true
 }
 
 # スクリプト終了時に必ずクリーンアップ

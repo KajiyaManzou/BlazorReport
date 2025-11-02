@@ -21,39 +21,77 @@ using Microsoft.Playwright;
       private ILocator Table => _page.Locator("table");
       private ILocator TableRows => _page.Locator("tbody tr");
 
-      // Actions
-      public async Task NavigateAsync()
-      {
-          await _page.GotoAsync(PlaywrightSettings.BaseUrl);
-          await _page.WaitForLoadStateAsync(LoadState.NetworkIdle);
-      }
+    // Actions
+    public async Task NavigateAsync()
+    {
+        await _page.GotoAsync(PlaywrightSettings.BaseUrl);
+        await _page.WaitForLoadStateAsync(LoadState.DOMContentLoaded);
 
-      public async Task<string> GetTitleAsync()
-      {
-          return await Title.TextContentAsync() ?? "";
-      }
+        // Blazor WebAssemblyの初期化完了を待機
+        // 「データを読み込んでいます...」メッセージの出現と消失を待つ
+        await WaitForBlazorAsync();
+    }
 
-      public async Task<IDownload> DownloadExcelAsync()
-      {
-          var downloadTask = _page.WaitForDownloadAsync();
-          await ExcelButton.ClickAsync();
-          return await downloadTask;
-      }
+    /// <summary>
+    /// Blazor WebAssemblyの初期化とデータロードが完了するまで待機
+    /// </summary>
+    private async Task WaitForBlazorAsync()
+    {
+        // まず、h2タイトルが表示されるまで待機（Blazor初期化の指標）
+        try
+        {
+            await Title.WaitForAsync(new() { State = WaitForSelectorState.Visible, Timeout = 30000 });
+        }
+        catch (TimeoutException)
+        {
+            // タイトルが表示されない場合は続行
+        }
 
-      public async Task<IDownload> DownloadPdfAsync()
-      {
-          var downloadTask = _page.WaitForDownloadAsync();
-          await PdfButton.ClickAsync();
-          return await downloadTask;
-      }
+        // 「データを読み込んでいます...」または「データがありません。」が表示されるのを待機
+        var loadingOrNoData = _page.Locator("text=/データを読み込んでいます...|データがありません。/");
+        try
+        {
+            await loadingOrNoData.WaitForAsync(new() { State = WaitForSelectorState.Visible, Timeout = 5000 });
 
-      public async Task<int> GetTableRowCountAsync()
-      {
-          return await TableRows.CountAsync();
-      }
+            // 「データを読み込んでいます...」が表示されている場合、消えるまで待機
+            var loading = _page.GetByText("データを読み込んでいます...");
+            await loading.WaitForAsync(new() { State = WaitForSelectorState.Hidden, Timeout = 30000 });
+        }
+        catch (TimeoutException)
+        {
+            // メッセージが表示されない場合（データがすでに読み込まれている）は続行
+        }
 
-      public async Task<bool> IsTableVisibleAsync()
-      {
-          return await Table.IsVisibleAsync();
-      }
+        // さらに1秒待機してレンダリング完了を確保
+        await _page.WaitForTimeoutAsync(1000);
+    }
+
+    public async Task<string> GetTitleAsync()
+    {
+        return await Title.TextContentAsync() ?? "";
+    }
+
+    public async Task<IDownload> DownloadExcelAsync()
+    {
+        var downloadTask = _page.WaitForDownloadAsync();
+        await ExcelButton.ClickAsync();
+        return await downloadTask;
+    }
+
+    public async Task<IDownload> DownloadPdfAsync()
+    {
+        var downloadTask = _page.WaitForDownloadAsync();
+        await PdfButton.ClickAsync();
+        return await downloadTask;
+    }
+
+    public async Task<int> GetTableRowCountAsync()
+    {
+        return await TableRows.CountAsync();
+    }
+
+    public async Task<bool> IsTableVisibleAsync()
+    {
+        return await Table.IsVisibleAsync();
+    }
   }

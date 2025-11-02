@@ -10,17 +10,29 @@ using Microsoft.Playwright;
   [TestFixture]
   public class TestBase : PageTest
   {
-      [SetUp]
-      public async Task SetUp()
-      {
-          // ブラウザコンテキストの設定
-          await Context.Tracing.StartAsync(new()
-          {
-              Screenshots = true,
-              Snapshots = true,
-              Sources = true
-          });
-      }
+    [SetUp]
+    public async Task SetUp()
+    {
+        // ブラウザコンテキストの設定
+        await Context.Tracing.StartAsync(new()
+        {
+            Screenshots = true,
+            Snapshots = true,
+            Sources = true
+        });
+
+        // コンソールログをキャプチャ
+        Page.Console += (_, msg) =>
+        {
+            Console.WriteLine($"[Browser {msg.Type}] {msg.Text}");
+        };
+
+        // ページエラーをキャプチャ
+        Page.PageError += (_, exception) =>
+        {
+            Console.WriteLine($"[Page Error] {exception}");
+        };
+    }
 
       [TearDown]
       public async Task TearDown()
