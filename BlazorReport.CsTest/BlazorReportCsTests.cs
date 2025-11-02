@@ -3,6 +3,7 @@ using System.Net.Http.Json;
 using System.Text;
 using BlazorReport.Models;
 using BlazorReport.Services;
+using ClosedXML.Excel;
 using Moq;
 using Moq.Protected;
 
@@ -355,5 +356,234 @@ public class EmployeeServiceTests
                     req.RequestUri.ToString() == "http://localhost/data/SampleData.json"),
                 ItExpr.IsAny<CancellationToken>()
             );
+    }
+}
+
+/// <summary>
+/// ExcelExportServiceの単体テストクラス
+/// </summary>
+public class ExcelExportServiceTests
+{
+    /// <summary>
+    /// ExportToExcel_正常系_Excelファイルを生成できる
+    /// Employeeリストを渡して、正常にExcelファイル（byte[]）が生成され、
+    /// 生成されたExcelファイルの内容が正しいことを検証
+    /// </summary>
+    [Fact]
+    public void ExportToExcel_Normal_GeneratesExcelFile()
+    {
+        // Arrange
+        // テスト用のEmployeeリストを作成
+        var employees = new List<Employee>
+        {
+            new Employee
+            {
+                EmployeeNumber = "1234567890",
+                Name = "山田太郎",
+                Department = "営業部",
+                Post = "営業部長",
+                DateOfJoining = "2010-04-01"
+            },
+            new Employee
+            {
+                EmployeeNumber = "2345678901",
+                Name = "佐藤花子",
+                Department = "人事部",
+                Post = "人事課長",
+                DateOfJoining = "2012-04-01"
+            },
+            new Employee
+            {
+                EmployeeNumber = "3456789012",
+                Name = "鈴木一郎",
+                Department = "開発部",
+                Post = "シニアエンジニア",
+                DateOfJoining = "2015-07-01"
+            }
+        };
+
+        var excelExportService = new ExcelExportService();
+
+        // Act
+        // ExportToExcelメソッドを呼び出してExcelファイルを生成
+        var result = excelExportService.ExportToExcel(employees);
+
+        // Assert
+        // byte[]が返されることを検証
+        Assert.NotNull(result);
+        Assert.True(result.Length > 0, "Excelファイルのサイズは0より大きい必要があります");
+
+        // 生成されたExcelファイルの内容を検証
+        using var stream = new MemoryStream(result);
+        using var workbook = new XLWorkbook(stream);
+
+        // ワークシートが存在することを検証
+        Assert.True(workbook.Worksheets.Count > 0, "ワークシートが1つ以上存在する必要があります");
+
+        var worksheet = workbook.Worksheet(1);
+
+        // シート名を検証
+        Assert.Equal("社員情報", worksheet.Name);
+
+        // ヘッダー行を検証
+        Assert.Equal("社員番号", worksheet.Cell(1, 1).Value.ToString());
+        Assert.Equal("氏名", worksheet.Cell(1, 2).Value.ToString());
+        Assert.Equal("所属", worksheet.Cell(1, 3).Value.ToString());
+        Assert.Equal("役職", worksheet.Cell(1, 4).Value.ToString());
+        Assert.Equal("入社年月日", worksheet.Cell(1, 5).Value.ToString());
+
+        // データ行数を検証（ヘッダー + データ3件 = 4行）
+        // 436行目の修正例
+        var lastRow = worksheet.LastRowUsed();
+        Assert.NotNull(lastRow);
+        Assert.Equal(4, lastRow.RowNumber());
+        //Assert.Equal(4, worksheet.LastRowUsed().RowNumber());
+
+        // 1件目のデータを検証
+        Assert.Equal("1234567890", worksheet.Cell(2, 1).Value.ToString());
+        Assert.Equal("山田太郎", worksheet.Cell(2, 2).Value.ToString());
+        Assert.Equal("営業部", worksheet.Cell(2, 3).Value.ToString());
+        Assert.Equal("営業部長", worksheet.Cell(2, 4).Value.ToString());
+        Assert.Equal("2010-04-01", worksheet.Cell(2, 5).Value.ToString());
+
+        // 2件目のデータを検証
+        Assert.Equal("2345678901", worksheet.Cell(3, 1).Value.ToString());
+        Assert.Equal("佐藤花子", worksheet.Cell(3, 2).Value.ToString());
+
+        // 3件目のデータを検証
+        Assert.Equal("3456789012", worksheet.Cell(4, 1).Value.ToString());
+        Assert.Equal("鈴木一郎", worksheet.Cell(4, 2).Value.ToString());
+    }
+
+    /// <summary>
+    /// ExportToExcel_空リスト_例外をスローせずヘッダーのみのExcelを生成
+    /// 空のEmployeeリストを渡しても、例外が発生せずにヘッダー行のみを含むExcelファイルが生成されることを検証
+    /// </summary>
+    [Fact]
+    public void ExportToExcel_EmptyList_GeneratesExcelWithHeaderOnly()
+    {
+        // Arrange
+        // 空のEmployeeリストを作成
+        var emptyEmployees = new List<Employee>();
+
+        var excelExportService = new ExcelExportService();
+
+        // Act
+        // 空のリストでExcelファイルを生成（例外が発生しなければテスト成功）
+        var result = excelExportService.ExportToExcel(emptyEmployees);
+
+        // Assert
+        // byte[]が返されることを検証
+        Assert.NotNull(result);
+        Assert.True(result.Length > 0, "空リストでもExcelファイルが生成される必要があります");
+
+        // 生成されたExcelファイルの内容を検証
+        using var stream = new MemoryStream(result);
+        using var workbook = new XLWorkbook(stream);
+
+        var worksheet = workbook.Worksheet(1);
+
+        // シート名を検証
+        Assert.Equal("社員情報", worksheet.Name);
+
+        // ヘッダー行が存在することを検証
+        Assert.Equal("社員番号", worksheet.Cell(1, 1).Value.ToString());
+        Assert.Equal("氏名", worksheet.Cell(1, 2).Value.ToString());
+        Assert.Equal("所属", worksheet.Cell(1, 3).Value.ToString());
+        Assert.Equal("役職", worksheet.Cell(1, 4).Value.ToString());
+        Assert.Equal("入社年月日", worksheet.Cell(1, 5).Value.ToString());
+
+        // データ行が存在しないことを検証（ヘッダー行のみ = 1行）
+        // 493行目の修正例
+        var lastRow = worksheet.LastRowUsed();
+        Assert.NotNull(lastRow);
+        Assert.Equal(1, lastRow.RowNumber());
+        //Assert.Equal(1, worksheet.LastRowUsed().RowNumber());
+    }
+
+    /// <summary>
+    /// ExportToExcel_特殊文字_正しく処理される
+    /// 様々な特殊文字（改行、タブ、引用符、HTML特殊文字など）を含むデータでExcelファイルを生成し、
+    /// 生成されたExcelファイルに特殊文字が正しく含まれ、例外が発生しないことを検証
+    /// </summary>
+    [Fact]
+    public void ExportToExcel_SpecialCharacters_HandledCorrectly()
+    {
+        // Arrange
+        // 様々な特殊文字を含むテストデータを作成
+        var employees = new List<Employee>
+        {
+            new Employee
+            {
+                EmployeeNumber = "1111111111",
+                Name = "改行\nテスト",  // 改行文字
+                Department = "タブ\tテスト",  // タブ文字
+                Post = "引用符\"テスト\"",  // ダブルクォート
+                DateOfJoining = "2020-01-01"
+            },
+            new Employee
+            {
+                EmployeeNumber = "2222222222",
+                Name = "カンマ,テスト",  // カンマ
+                Department = "セミコロン;テスト",  // セミコロン
+                Post = "アポストロフィ'テスト",  // シングルクォート
+                DateOfJoining = "2021-01-01"
+            },
+            new Employee
+            {
+                EmployeeNumber = "3333333333",
+                Name = "<>&\"'",  // HTML特殊文字
+                Department = "不等号<>テスト",
+                Post = "バックスラッシュ\\テスト",
+                DateOfJoining = "2022-01-01"
+            }
+        };
+
+        var excelExportService = new ExcelExportService();
+
+        // Act
+        // 特殊文字を含むExcelファイルを生成（例外が発生しなければテスト成功）
+        var result = excelExportService.ExportToExcel(employees);
+
+        // Assert
+        // byte[]が返されることを検証
+        Assert.NotNull(result);
+        Assert.True(result.Length > 0, "特殊文字を含むデータでもExcelファイルが生成される必要があります");
+
+        // 生成されたExcelファイルの内容を検証
+        using var stream = new MemoryStream(result);
+        using var workbook = new XLWorkbook(stream);
+        var worksheet = workbook.Worksheet(1);
+
+        // シート名を検証
+        Assert.Equal("社員情報", worksheet.Name);
+
+        // 特殊文字が正しく保存されていることを検証（1件目）
+        Assert.Equal("1111111111", worksheet.Cell(2, 1).Value.ToString());
+        Assert.Equal("改行\nテスト", worksheet.Cell(2, 2).Value.ToString());
+        Assert.Equal("タブ\tテスト", worksheet.Cell(2, 3).Value.ToString());
+        Assert.Equal("引用符\"テスト\"", worksheet.Cell(2, 4).Value.ToString());
+        Assert.Equal("2020-01-01", worksheet.Cell(2, 5).Value.ToString());
+
+        // 特殊文字が正しく保存されていることを検証（2件目）
+        Assert.Equal("2222222222", worksheet.Cell(3, 1).Value.ToString());
+        Assert.Equal("カンマ,テスト", worksheet.Cell(3, 2).Value.ToString());
+        Assert.Equal("セミコロン;テスト", worksheet.Cell(3, 3).Value.ToString());
+        Assert.Equal("アポストロフィ'テスト", worksheet.Cell(3, 4).Value.ToString());
+        Assert.Equal("2021-01-01", worksheet.Cell(3, 5).Value.ToString());
+
+        // 特殊文字が正しく保存されていることを検証（3件目）
+        Assert.Equal("3333333333", worksheet.Cell(4, 1).Value.ToString());
+        Assert.Equal("<>&\"'", worksheet.Cell(4, 2).Value.ToString());
+        Assert.Equal("不等号<>テスト", worksheet.Cell(4, 3).Value.ToString());
+        Assert.Equal("バックスラッシュ\\テスト", worksheet.Cell(4, 4).Value.ToString());
+        Assert.Equal("2022-01-01", worksheet.Cell(4, 5).Value.ToString());
+
+        // 総行数を検証（ヘッダー1行 + データ3行 = 4行）
+        // 575行目の修正例
+        var lastRow = worksheet.LastRowUsed();
+        Assert.NotNull(lastRow);
+        Assert.Equal(4, lastRow.RowNumber());
+        //Assert.Equal(4, worksheet.LastRowUsed().RowNumber());
     }
 }
