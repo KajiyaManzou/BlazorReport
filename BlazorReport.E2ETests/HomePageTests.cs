@@ -10,6 +10,12 @@ namespace BlazorReport.E2ETests;
 [TestFixture]
 public class HomePageTests : TestBase
 {
+    // テストデータ定数
+    private static readonly string[] ExpectedEmployeeNames =
+    {
+        "山田太郎", "佐藤花子", "鈴木一郎", "田中美咲", "高橋健太"
+    };
+
     // =====================================
     // 3.1 ページロードと初期表示テスト
     // =====================================
@@ -46,7 +52,6 @@ public class HomePageTests : TestBase
     /// 【3.1】HomePage_Load_SampleDataが読み込まれる
     /// - ページロード完了を待機
     /// - テーブルに5件のデータが表示されることを検証
-    /// - 「山田太郎」などの社員名が表示されることを検証
     /// </summary>
     [Test]
     public async Task HomePage_Load_SampleDataLoaded()
@@ -55,13 +60,40 @@ public class HomePageTests : TestBase
         var homePage = new HomePage(Page);
         await homePage.NavigateAsync();
 
-        // Assert - 「山田太郎」「佐藤花子」が表示されることを確認
-        await Expect(Page.GetByText("山田太郎")).ToBeVisibleAsync(new() { Timeout = 5000 });
-        await Expect(Page.GetByText("佐藤花子")).ToBeVisibleAsync();
-
-        // Assert - テーブル行数を確認
+        // Assert - テーブル行数を確認（データが読み込まれたことの検証）
         var tableRows = Page.Locator("tbody tr");
         var rowCount = await tableRows.CountAsync();
-        Assert.That(rowCount, Is.EqualTo(5), $"テーブルに5件のデータが表示されることを期待しましたが、実際は{rowCount}件でした");
+        Assert.That(rowCount, Is.EqualTo(5),
+            $"テーブルに5件のデータが表示されることを期待しましたが、実際は{rowCount}件でした");
+    }
+
+    // =====================================
+    // 3.2 データ表示テスト
+    // =====================================
+
+    /// <summary>
+    /// 【3.2】Home_WithData_テーブルに社員情報を表示
+    /// - テーブルの行数が正しいことを検証
+    /// - 各社員の名前がページに含まれることを検証
+    /// </summary>
+    [Test]
+    public async Task Home_WithData_DisplaysEmployeeTable()
+    {
+        // Arrange & Act - アプリケーションにアクセス
+        var homePage = new HomePage(Page);
+        await homePage.NavigateAsync();
+
+        // Assert - テーブルの行数が正しいことを検証
+        var tableRows = Page.Locator("tbody tr");
+        var rowCount = await tableRows.CountAsync();
+        Assert.That(rowCount, Is.EqualTo(5),
+            $"テーブルに5件のデータが表示されることを期待しましたが、実際は{rowCount}件でした");
+
+        // Assert - 各社員の名前がページに含まれることを検証
+        foreach (var employeeName in ExpectedEmployeeNames)
+        {
+            var employeeNameLocator = Page.GetByText(employeeName);
+            await Expect(employeeNameLocator).ToBeVisibleAsync(new() { Timeout = 5000 });
+        }
     }
 }
