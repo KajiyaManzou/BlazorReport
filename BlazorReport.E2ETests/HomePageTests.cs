@@ -1,6 +1,7 @@
 using BlazorReport.E2ETests.PageObjects;
 using Microsoft.Playwright;
 using Microsoft.Playwright.NUnit;
+using System.Linq;
 
 namespace BlazorReport.E2ETests;
 
@@ -14,6 +15,11 @@ public class HomePageTests : TestBase
     private static readonly string[] ExpectedEmployeeNames =
     {
         "山田太郎", "佐藤花子", "鈴木一郎", "田中美咲", "高橋健太"
+    };
+
+    private static readonly string[] ExpectedColumnHeaders =
+    {
+        "社員番号", "氏名", "所属", "役職", "入社年月日"
     };
 
     // =====================================
@@ -94,6 +100,39 @@ public class HomePageTests : TestBase
         {
             var employeeNameLocator = Page.GetByText(employeeName);
             await Expect(employeeNameLocator).ToBeVisibleAsync(new() { Timeout = 5000 });
+        }
+    }
+
+    /// <summary>
+    /// 【3.2】Home_WithData_各列が正しく表示される
+    /// - 社員番号、氏名、所属、役職、入社年月日の列が存在することを検証
+    /// </summary>
+    [Test]
+    public async Task Home_WithData_DisplaysExpectedColumns()
+    {
+        // Arrange & Act - アプリケーションにアクセス
+        var homePage = new HomePage(Page);
+        await homePage.NavigateAsync();
+
+        // Assert - ヘッダーが表示されることを待機
+        var headerLocator = Page.Locator("thead th");
+        await Expect(headerLocator.First).ToBeVisibleAsync(new() { Timeout = 5000 });
+
+        // Assert - 実際の列ヘッダーを取得
+        var actualHeaders = (await headerLocator.AllTextContentsAsync())
+            .Select(text => text.Trim())
+            .Where(text => !string.IsNullOrEmpty(text))
+            .ToList();
+
+        // Assert - 列数が正しいことを検証
+        Assert.That(actualHeaders.Count, Is.EqualTo(ExpectedColumnHeaders.Length),
+            $"列数が{ExpectedColumnHeaders.Length}であることを期待しましたが、実際は{actualHeaders.Count}でした。取得したヘッダー: {string.Join(", ", actualHeaders)}");
+
+        // Assert - 期待される列ヘッダーが全て含まれることを検証
+        foreach (var expectedHeader in ExpectedColumnHeaders)
+        {
+            Assert.That(actualHeaders, Does.Contain(expectedHeader),
+                $"列ヘッダー「{expectedHeader}」が表示されていません。取得したヘッダー: {string.Join(", ", actualHeaders)}");
         }
     }
 }
