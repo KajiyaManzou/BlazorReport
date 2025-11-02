@@ -5,6 +5,8 @@ VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlazorReport", "BlazorReport\BlazorReport.csproj", "{AA51CAD3-A809-4BEF-9FB3-1DED6B52B795}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlazorReport.CsTest", "BlazorReport.CsTest\BlazorReport.CsTest.csproj", "{32029201-9C10-41DD-A34A-DF66F7301919}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,5 +20,13 @@ Global
 		{AA51CAD3-A809-4BEF-9FB3-1DED6B52B795}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AA51CAD3-A809-4BEF-9FB3-1DED6B52B795}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AA51CAD3-A809-4BEF-9FB3-1DED6B52B795}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6B6EBB70-5103-49C5-9222-88A2E1805DD4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6B6EBB70-5103-49C5-9222-88A2E1805DD4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6B6EBB70-5103-49C5-9222-88A2E1805DD4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6B6EBB70-5103-49C5-9222-88A2E1805DD4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{32029201-9C10-41DD-A34A-DF66F7301919}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{32029201-9C10-41DD-A34A-DF66F7301919}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{32029201-9C10-41DD-A34A-DF66F7301919}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{32029201-9C10-41DD-A34A-DF66F7301919}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
