@@ -196,4 +196,5 @@ public class BlazorReportRazorTests : TestContext
             Assert.Contains("データがありません。", messageElement.TextContent);
         });
     }
+
 }

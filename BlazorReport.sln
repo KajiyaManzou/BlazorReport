@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlazorReport.CsTest", "Blaz
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlazorReport.RazorTest", "BlazorReport.RazorTest\BlazorReport.RazorTest.csproj", "{A27B6B3B-B328-4273-95FD-711DD488F5D9}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlazorReport.E2ETests", "BlazorReport.E2ETests\BlazorReport.E2ETests.csproj", "{784C6E65-99C6-42BD-96B5-AB33F1D5700B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -34,5 +36,9 @@ Global
 		{A27B6B3B-B328-4273-95FD-711DD488F5D9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A27B6B3B-B328-4273-95FD-711DD488F5D9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A27B6B3B-B328-4273-95FD-711DD488F5D9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{784C6E65-99C6-42BD-96B5-AB33F1D5700B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{784C6E65-99C6-42BD-96B5-AB33F1D5700B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{784C6E65-99C6-42BD-96B5-AB33F1D5700B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{784C6E65-99C6-42BD-96B5-AB33F1D5700B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
